@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ask</title>
+</head>
+
+<ul>
+
+    {% for k in skills %}
+        <li>{{ k }}</li>
+
+    {% endfor %}
+</ul>
+
+
+<div>
+    Query:
+    <form action="{{ url_for('grok') }}" method="POST">
+        <input type="text" name="q" id="queryString"/>
+
+        <input type="submit" id="grokSubmitButton"/>
+    </form>
+
+    <div id="queryResult"></div>
+</div>
+
+
+<br><br>
+
+
+<script src="static/lodash.js"></script>
+<script type="text/javascript">
+
+    function modifyText() {
+        let t2 = document.getElementById("t2");
+        let qs = document.getElementById('queryString');
+
+        skill_name = qs.replace(/ .*/, '');
+        console.log(skill_name);
+        let qr = document.getElementById('queryResult');
+        qr.innerText = skill_name;
+    }
+
+    let gsb = document.querySelector('grokSubmitButton');
+    gsb.addEventListener("click", modifyText, false);
+
+
+    {#
+
+    selectObj.each(data, function(i, val){
+        selectObj.append($('<option />', { value: (i+1), text: val[i+1] }));
+    });
+        var data = [{'1':'Name'}, {'2': 'Age'}, {'3': 'Gender'}];
+
+    var $select = $('#datas');
+    $.each(data, function(i, val){
+        $select.append($('<option />', { value: (i+1), text: val[i+1] }));
+    });
+    #}
+
+
+</script>
+</body>
+</html>
