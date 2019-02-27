@@ -1,7 +1,4 @@
 Flask==1.0.2
 Flask-RESTful==0.3.7
 snips-nlu==0.19.2
-snips-nlu-en==0.2.1
 snips-nlu-metrics==0.14.1
-snips-nlu-parsers==0.1.2
-snips-nlu-utils==0.7.1
