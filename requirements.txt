@@ -1,4 +1,4 @@
-Flask==1.0.2
-Flask-RESTful==0.3.7
-snips-nlu==0.19.2
-snips-nlu-metrics==0.14.1
+Flask
+Flask-RESTful
+snips-nlu
+

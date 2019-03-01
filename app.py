@@ -7,6 +7,8 @@ from snips_nlu.default_configs import CONFIG_EN
 
 import shelve
 import json
+import structlog
+
 
 app = Flask(__name__)
 api = Api(app)
@@ -20,6 +22,46 @@ nlu_engines = {}
 def abort_if_spec_doesnt_exist(skl_id, message=''):
     if skl_id not in skills:
         abort(404, message=message)
+
+
+from pathlib import Path
+import snips_nlu as sn
+
+
+class SkillStore(dict):
+    def __init__(self, parent_dir='/storage', snips_nlu_engine_config=sn.CONFIG_EN):
+        self.parent_dir = Path(parent_dir)
+
+        self.parent_dir.mkdir(parents=True, exist_ok=True)
+        self.snips_nlu_engine_config = snips_nlu_engine_config
+
+    def list_skills(self):
+        return [x.name for x in self.p.iterdir() if x.name[0] != '.']
+
+    def __setitem__(self, skill_name, skill_definition):
+        engine = sn.SnipsNLUEngine(config=self.snips_nlu_engine_config)
+        engine.fit(skill_definition)
+
+        app.logger.info("SkillStore.__setitem__(skill_name=%s)" % skill_name)
+
+        skill_path = self.parent_dir.joinpath(skill_name)
+        if(skill_path.exists()):
+            app.logger.info("SkillStore.__setitem__(skill_name=%s) - Overwriting existing skill!" % skill_name)
+
+        engine.persist(self.parent_dir.joinpath(skill_name))
+
+    def __getitem__(self, skill_name):
+            engine = sn.SnipsNLUEngine(config=self.snips_nlu_engine_config)
+            engine.load_from_path(self.parent_dir, skill_name)
+            return engine
+
+
+    4
+
+
+
+
+
 
 
 class Grokker(Resource):
