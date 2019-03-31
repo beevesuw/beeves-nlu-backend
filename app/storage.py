@@ -29,7 +29,6 @@ class SkillStore(UserDict):
         app.logger.info('keys: %s', str(result))
         return result
 
-
     def __setitem__(self, skill_name, skill_definition):
         engine = sn.SnipsNLUEngine(config=self.snips_nlu_engine_config)
         engine.fit(skill_definition)
