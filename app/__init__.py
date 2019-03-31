@@ -15,13 +15,9 @@ app.config.update(JSON_SORT_KEYS=True,
                   JSON_AS_ASCII=False,
                   DEBUG=True)
 
-
-
 from app.storage import SkillStore
 
 app.skill_store = SkillStore()
-
-
 
 if not app.debug:
     import logging
@@ -38,7 +34,6 @@ from app.resources import *
 api.add_resource(SkillList, '/skills', '/')
 api.add_resource(Skill, '/skill/<skill_name>')
 api.add_resource(Grokker, '/grok')
-
 
 if __name__ == '__main__':
     app.run(debug=app.debug, static_url_path='./static/')
