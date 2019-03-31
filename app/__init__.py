@@ -1,17 +1,27 @@
 import os
 
 from flask import Flask
+from flask_restful import Api
+
+app = Flask(__name__, static_url_path='/static/')
+app.config.from_object('app.default_settings')
+
+api = Api(app)
+
+app.debug = True
+
+app.config.update(JSON_SORT_KEYS=True,
+                  JSONIFY_PRETTYPRINT_REGULAR=True,
+                  JSON_AS_ASCII=False,
+                  DEBUG=True)
+
+
 
 from app.storage import SkillStore
 
-app = Flask(__name__)
-app.config.from_object('app.default_settings')
-app.config.from_envvar('APP_SETTINGS')
-
 app.skill_store = SkillStore()
-app.debug = True
 
-import app.resources
+
 
 if not app.debug:
     import logging
@@ -23,5 +33,12 @@ if not app.debug:
     file_handler.setFormatter(logging.Formatter('<%(asctime)s> <%(levelname)s> %(message)s'))
     app.logger.addHandler(file_handler)
 
+from app.resources import *
+
+api.add_resource(SkillList, '/skills', '/')
+api.add_resource(Skill, '/skill/<skill_name>')
+api.add_resource(Grokker, '/grok')
+
+
 if __name__ == '__main__':
-    app.run(debug=True, static_url_path='./static/')
+    app.run(debug=app.debug, static_url_path='./static/')

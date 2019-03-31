@@ -1,5 +1,6 @@
 # import shelve
 import shutil
+from collections import UserDict
 from pathlib import Path
 
 import snips_nlu as sn
@@ -8,7 +9,7 @@ import snips_nlu.default_configs
 from app import app
 
 
-class SkillStore(dict):
+class SkillStore(UserDict):
     """
     The SkillStore object is an interface to snips_nlu.SnipsNLUEngine's persisted trained engines.
 
@@ -18,15 +19,16 @@ class SkillStore(dict):
 
     def __init__(self, parent_dir='./storage-dir', snips_nlu_engine_config=snips_nlu.default_configs.CONFIG_EN):  # noqa
         self.parent_dir = Path(parent_dir)
+        app.logger.info("SkillStore._init__)")
 
-        self.parent_dir.mkdir(parents=True, exist_ok=True)
+        self.parent_dir.mkdir(parents=False, exist_ok=True)
         self.snips_nlu_engine_config = snips_nlu_engine_config
 
     def keys(self):
-        return [x.name for x in self.parent_dir.iterdir() if x.is_dir() and x.name[0] != '.']
+        result = [x.name for x in self.parent_dir.iterdir() if x.is_dir() and x.name not in ('.', '..')]
+        app.logger.info('keys: %s', str(result))
+        return result
 
-    def list_skills(self):
-        return [x for x in self.parent_dir.iterdir() if x.is_dir() and x.name[0] != '.']
 
     def __setitem__(self, skill_name, skill_definition):
         engine = sn.SnipsNLUEngine(config=self.snips_nlu_engine_config)
@@ -41,8 +43,13 @@ class SkillStore(dict):
         engine.persist(self.parent_dir.joinpath(skill_name))
 
     def __getitem__(self, skill_name):
-        engine = sn.SnipsNLUEngine(config=self.snips_nlu_engine_config)
-        engine.load_from_path(self.parent_dir, skill_name)
+        engine = None
+        if skill_name in self:
+            engine = sn.SnipsNLUEngine(config=self.snips_nlu_engine_config)
+            engine.load_from_path(self.parent_dir, skill_name)
+            app.logger.info("SkillStore.__getitem__(skill_name=%s) success" % skill_name)
+        else:
+            app.logger.info("SkillStore.__getitem__(skill_name=%s) not found" % skill_name)
         return engine
 
     def __delitem__(self, skill_name):
@@ -56,7 +63,7 @@ class SkillStore(dict):
         shutil.rmtree(skill_path, ignore_errors=True)
 
     def __contains__(self, skill_name):
-        return skill_name in self.list_skills()
+        return skill_name in self.keys()
 
     def __len__(self):
         if self.parent_dir.is_dir():

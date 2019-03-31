@@ -10,21 +10,11 @@ MAINTAINER Altan Orhon <altan@uw.edu>
 RUN apt-get -y update && apt-get install -y --no-install-recommends \
          wget \
          python3 \
-         nginx \
-         ca-certificates \
-         dirmgr
-#    && rm -rf /var/lib/apt/lists/*
+         python3-setuptools \
+         python3-pip \
+         ca-certificates
 
 
-RUN wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py && \
-    pip install -r requirements.txt
-# (cd /usr/local/lib/python2.7/dist-packages/scipy/.libs; rm *; ln ../../numpy/.libs/* .) && \
-#        rm -rf /root/.cache
-
-# Set some environment variables. PYTHONUNBUFFERED keeps Python from buffering our standard
-# output stream, which means that logs can be delivered to the user quickly. PYTHONDONTWRITEBYTECODE
-# keeps Python from writing the .pyc files which are unnecessary in this case. We also update
-# PATH so that the train and serve programs are found when the container is invoked.
 
 ENV PYTHONUNBUFFERED=TRUE
 ENV PYTHONDONTWRITEBYTECODE=TRUE
@@ -33,4 +23,21 @@ ENV PATH="/opt/program:${PATH}"
 # Set up the program in the image
 COPY . /opt/program
 WORKDIR /opt/program
+
+
+
+
+# We copy just the requirements.txt first to leverage Docker cache
+COPY ./requirements.txt /app/requirements.txt
+
+WORKDIR /app
+
+
+RUN pip3 install -r requirements.txt
+
+COPY . /app
+
+ENTRYPOINT [ "python3" ]
+
+RUN  run  # TODO: Figur eout
 
