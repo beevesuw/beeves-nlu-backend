@@ -8,7 +8,13 @@ from app import app
 
 
 class Grokker(Resource):
-    """Attempt to dispatch and resolve request"""
+    """Attempt to dispatch and resolve request
+
+
+        curl -d '{"q":"beverage make me coffee"}' -H "Content-Type: application/json" -X POST http://localhost:5000/grok
+
+
+    """
 
     def post(self):
         q = request.get_json()
@@ -17,13 +23,18 @@ class Grokker(Resource):
         if skill_name not in app.skill_store.keys():
             abort(404, msg="Skill %s not found" % skill_name)
 
-        parse_result = app.skill_store[skill_name].parse(q["q"])
+        skill = app.skill_store[skill_name]
+
+        parse_result = skill['engine'].parse(q["q"])
         return {"skill_id": skill_name, "parse_result": parse_result}
 
 
 # noinspection PyMethodMayBeStatic
 class Skill(Resource):
-    """ GET - return the specification of the skill embodied by the model"""
+    """ GET - return the specification of the skill embodied by the model
+
+
+    """
 
     @staticmethod
     def canonicalize_skill_name(skill_name):
@@ -45,7 +56,11 @@ class Skill(Resource):
 
         found_skill = app.skill_store.get(skill_name)
         if found_skill:
-            return {skill_name: found_skill}
+            dataset_metadata = found_skill['src']
+            if not dataset_metadata:
+                dataset_metadata = {}
+            return {skill_name: dataset_metadata}
+
 
     """ DEL - delete the skill"""
 
@@ -76,4 +91,4 @@ class SkillList(Resource):
     """ List skills"""
 
     def get(self):
-        return dict(app.skill_store)
+        return list(app.skill_store.keys())
