@@ -117,3 +117,5 @@ dmypy.json
 
 *.shelve
 /package-lock.json
+/skill_store.db
+/logs/

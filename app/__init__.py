@@ -3,7 +3,7 @@ import os
 from flask import Flask
 from flask_restful import Api
 
-app = Flask(__name__, static_url_path='/static/')
+app = Flask(__name__)
 app.config.from_object('app.default_settings')
 
 api = Api(app)
@@ -23,8 +23,11 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 
 # https://docs.python.org/3.6/library/logging.handlers.html#timedrotatingfilehandler
+
+
+# Set up a log file in the LOG_DIR directory specified in default_settings.py:
 file_handler = TimedRotatingFileHandler(os.path.join(app.config['LOG_DIR'], 'app.log'), 'midnight')
-file_handler.setLevel(logging.WARNING)
+file_handler.setLevel(level=os.environ.get("LOGLEVEL", "INFO"))
 file_handler.setFormatter(logging.Formatter('<%(asctime)s> <%(levelname)s> %(message)s'))
 app.logger.addHandler(file_handler)
 
@@ -39,4 +42,4 @@ api.add_resource(Skill, '/skill/<skill_name>')
 api.add_resource(Grokker, '/grok')
 
 if __name__ == '__main__':
-    app.run(debug=app.debug, static_url_path='./static/')
+    app.run(debug=app.debug)
