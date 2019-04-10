@@ -1,43 +1,33 @@
-# Build an image that can do training and inference in SageMaker
-# This is a Python 2 image that uses the nginx, gunicorn, flask stack
-# for serving inferences in a stable way.
-
-FROM debian:stretch
-
-MAINTAINER Altan Orhon <altan@uw.edu>
-
-
-RUN apt-get -y update && apt-get install -y --no-install-recommends \
-         wget \
-         python3 \
-         python3-setuptools \
-         python3-pip \
-         ca-certificates
+FROM python:3.7.3-stretch
 
 
 
-ENV PYTHONUNBUFFERED=TRUE
-ENV PYTHONDONTWRITEBYTECODE=TRUE
-ENV PATH="/opt/program:${PATH}"
-
-# Set up the program in the image
-COPY . /opt/program
-WORKDIR /opt/program
-
+LABEL summary="The beeeves NLU backend" \
+  io.k8s.description="The beeves NLU backend" \
+  name="beeves/beeves-nlu-backend" \
+  version="0.0.3" \
+  com.redhat.component="beeves-nlu-backend-docker" \
+  maintainer="Altan Orhon <altan@uw.edu>"
 
 
-
-# We copy just the requirements.txt first to leverage Docker cache
-COPY ./requirements.txt /app/requirements.txt
 
 WORKDIR /app
 
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
 
-RUN pip3 install -r requirements.txt
+COPY . .
 
-COPY . /app
+RUN python3 -m snips_nlu download en
 
-ENTRYPOINT [ "python3" ]
+EXPOSE 8337
 
-RUN  run  # TODO: Figur eout
+ENV FLASK_APP app
+ENV FLASK_ENV development
 
+# this stands for BEEV:
+# ENTRYPOINT [ "python app" ]
+
+# CMD ["flask run "]
+
+CMD [ "python3", "-m", "flask", "run", "--host=0.0.0.0", "--port=8337"]

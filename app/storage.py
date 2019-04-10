@@ -23,7 +23,7 @@ class SkillStore(object):
         __db:
     """
 
-    def __init__(self, db_path: str = 'skill_store.db',
+    def __init__(self, db_path: str = '../storage/skill_store.db',
                  snips_nlu_config: dict = snips_nlu.default_configs.CONFIG_EN):  # noqa
         """Initialize the store
         Args:
