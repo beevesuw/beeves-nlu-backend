@@ -2,38 +2,24 @@
 
 ## Docker:
 
-It's supposed to be something like this, but I haven't checkeed yet:
-
-~~~
-docker build -t bv-nlu .
-docker exec -ti bv-nlu sh -c "export FLASK ENV=development;flask run -h 127.0.0.1 -p 5000" -v storage:storage
-
-docker run -v storage:storage -t -i bv-nlu:latest bash
-
+Do this in the `beeves-nlu-backend` directory:
 ~~~
 
-docker run -v name:/path/to/persist -t -i myimage:latest bash
-
-## Run
-
-Run the app:
-
-~~~
-export FLASK_ENV=development
-flask run -h 127.0.0.1 -p 5000
+docker build -t bv-nlu . 
+docker run --name bvn -v storage:/storage -p 8337:8337 bv-nlu        
 ~~~
 
 
 ## Test
 
+Note that the host is going to be localhost, and the port is going to be `8337 (BEEV, from 8 3 3 7 )`
 Run `populate.sh` to load up the example datasets:
 
 ~~~
 ./test/populate.sh
 ~~~
 
-This POSTs a bunch of skill definitions that live in `test/datasets`. These are SnipsNLUEngine specifications. We're going to change this immediately to generalize, but that's how it was for the demo, so I'm just restoring to that point.
-
+This POSTs a bunch of skill definitions that live in `test/datasets`. These are SnipsNLUEngine specifications
 
 # Endpoints
 
