@@ -1,4 +1,5 @@
-FROM debian:stretch
+FROM python:3.7.3-stretch
+
 
 
 LABEL summary="The beeeves NLU backend" \
@@ -9,29 +10,24 @@ LABEL summary="The beeeves NLU backend" \
   maintainer="Altan Orhon <altan@uw.edu>"
 
 
-RUN apt-get -y update && apt-get install -y --no-install-recommends \
-  curl \
-  python3 \
-  python3-setuptools \
-  python3-pip \
-  python3-dev \
-  build-essential \
-  ca-certificates && apt-get clean
 
-ENV PYTHONUNBUFFERED=TRUE
-ENV PYTHONDONTWRITEBYTECODE=TRUE
-ENV PATH="/opt/program:${PATH}"
+WORKDIR /app
 
-# Set up the program in the image
-COPY . /opt/program
-WORKDIR /opt/program
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
 
+COPY . .
+
+RUN python3 -m snips_nlu download en
 
 EXPOSE 8337
 
-# We copy just the requirements.txt first to leverage Docker cache
-
-RUN pip3 install -r requirements.txt
+ENV FLASK_APP app
+ENV FLASK_ENV development
 
 # this stands for BEEV:
-CMD ["/bin/bash"]
+# ENTRYPOINT [ "python app" ]
+
+# CMD ["flask run "]
+
+CMD [ "python3", "-m", "flask", "run", "--host=0.0.0.0", "--port=8337"]

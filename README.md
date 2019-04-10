@@ -6,9 +6,13 @@ It's supposed to be something like this, but I haven't checkeed yet:
 
 ~~~
 docker build -t bv-nlu .
-docker exec -ti bv-nlu sh -c "export FLASK ENV=development;flask run -h 127.0.0.1 -p 5000"
+docker exec -ti bv-nlu sh -c "export FLASK ENV=development;flask run -h 127.0.0.1 -p 5000" -v storage:storage
+
+docker run -v storage:storage -t -i bv-nlu:latest bash
+
 ~~~
 
+docker run -v name:/path/to/persist -t -i myimage:latest bash
 
 ## Run
 
