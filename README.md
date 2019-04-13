@@ -25,7 +25,7 @@ This POSTs a bunch of skill definitions that live in `test/datasets`. These are 
 
 - `/`, `/skills`: list the skills
 
-- `/grok`: POST a statement like  this via curl: `curl -d '{"q":"beverage make me coffee"}' -H "Content-Type: application/json" -X POST http://localhost:5000/grok` and you get the result of SnipsNLUEngine.parse
+- `/grok`: POST a statement like  this via curl: `curl -d '{"q":"beverage make me coffee"}' -H "Content-Type: application/json" -X POST http://localhost:8337/grok` and you get the result of SnipsNLUEngine.parse
 - `/skill/<skill_name>`: get the original skill def
 
 
