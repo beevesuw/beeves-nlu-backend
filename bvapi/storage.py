@@ -1,14 +1,15 @@
-import logging
 from pathlib import Path
 
 import snips_nlu as sn
 import snips_nlu.default_configs
 import sqlitedict
+from flask import current_app
 
 
 # TODO: document interfaces
 # TODO: examples
 # TODO: pytest
+
 
 class SkillStore(object):
     """
@@ -23,22 +24,22 @@ class SkillStore(object):
         __db:
     """
 
-    def __init__(self, db_path: str = '../storage/skill_store.db',
-                 snips_nlu_config: dict = snips_nlu.default_configs.CONFIG_EN):  # noqa
+    def __init__(self, db_path: str,
+                 default_snips_nlu_config: dict = snips_nlu.default_configs.CONFIG_EN):  # noqa
         """Initialize the store
         Args:
             db_path: Path to which the database should be persisted
-            snips_nlu_config: Configuration passed to SnipsNLUEngine.
+            default_snips_nlu_config: Configuration passed to SnipsNLUEngine.
         """
 
         self.db_path = Path(db_path)
         if self.db_path.exists():
-            logging.getLogger().info(f"'{db_path}' already exists; using that'")
+            current_app.logger.info(f"'{db_path}' already exists; using that'")
 
         self.__db = sqlitedict.open(str(self.db_path), autocommit=True)
 
         self.configs = {'snips_nlu': snips_nlu_config}
-        logging.getLogger().info(f"Initialized {self.__class__.__name__} with path '{self.db_path}'")
+        current_app.logger.info(f"Initialized {self.__class__.__name__} with path '{self.db_path}'")
 
     def keys(self):
         """List the names of the skills in the store
@@ -58,12 +59,12 @@ class SkillStore(object):
         engine.fit(skill_definition)
 
         if skill_name in self.__db:
-            logging.getLogger().info(f"Skill with name  '{skill_name}' already exists; overwriting...'")
+            current_app.logger.info(f"Skill with name  '{skill_name}' already exists; overwriting...'")
 
         engine_bytes = engine.to_byte_array()
 
         if not engine_bytes:
-            logging.getLogger().warning(
+            current_app.logger.warning(
                 f"Skill with name  '{skill_name}' couldn't be serialized from the engine; aborting'")
             return
 
@@ -71,7 +72,7 @@ class SkillStore(object):
 
         self.__db[skill_name] = obj
         self.__db.sync()
-        logging.getLogger().info(f"Skill with name  '{skill_name}' written to the shelf'")
+        current_app.logger.info(f"Skill with name  '{skill_name}' written to the shelf'")
 
     def __getitem__(self, skill_name: str):
         """Get the skill definition and resources from the store
@@ -86,9 +87,9 @@ class SkillStore(object):
             if 'engine' in obj:
                 obj['engine'] = sn.SnipsNLUEngine.from_byte_array(obj['engine'])
             else:
-                logging.getLogger().warning(f"Skill '{skill_name}' didn't have a persisted engine")
+                current_app.logger.warning(f"Skill '{skill_name}' didn't have a persisted engine")
         else:
-            logging.getLogger().warning(f"Skill '{skill_name}' not found")
+            current_app.logger.warning(f"Skill '{skill_name}' not found")
             raise KeyError(f"Skill '{skill_name}' not found")
         return obj
 
@@ -111,3 +112,4 @@ class SkillStore(object):
         """Get number of skills
          """
         return len(self.__db)
+
