@@ -1,11 +1,9 @@
 # Instructions:
-# docker build -t altanorhon/beeves:bv-nlu-backend .
+# docker build -t altanorhon/beeves:beeves-nlu-backend .
 # docker run --name bvn -v storage:/storage -p 8337:8337 altanorhon/beeves:beeves-nlu-backend
 
 
 FROM python:3.7.3-stretch
-
-
 
 LABEL summary="The beeeves NLU backend" \
   io.k8s.description="The beeves NLU backend" \
@@ -13,7 +11,6 @@ LABEL summary="The beeeves NLU backend" \
   version="0.0.3" \
   com.redhat.component="beeves-nlu-backend-docker" \
   maintainer="Altan Orhon <altan@uw.edu>"
-
 
 
 WORKDIR /app

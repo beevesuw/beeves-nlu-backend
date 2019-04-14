@@ -14,27 +14,41 @@ Where `BEEVES_KEY` is specified either as a cookie that all clients should send 
 ## Just Docker
 
 # Instructions:
-# docker run --name bvn -v storage:/storage -p 8337:8337 altanorhon/beeves:beeves-nlu-backend
 
+`docker run --name bvn -v storage:/storage -p 8337:8337 altanorhon/beeves:beeves-nlu-backend`
 
 
 ## Test
 
-Note that the host is going to be localhost, and the port is going to be `8337 (BEEV, from 8 3 3 7 )`
+Note that the host is going to be localhost by default, and the port is going to be `8337 (BEEV, from 8 3 3 7 )`
+
+However, by defining the `BEEVES_SERVER_URL` environment variable, you can set a custom URL for that script:
+
+`export BEEVES_SERVER_URL=example.com:8337`
+
+If you have set a `BEEVES_KEY`, you're going to want that too:
+
+`export BEEVES_KEY=hunter2` 
+
 Run `populate.sh` to load up the example datasets:
 
 ~~~
 ./test/populate.sh
 ~~~
 
-This POSTs a bunch of skill definitions that live in `test/datasets`. These are SnipsNLUEngine specifications
+This POSTs a bunch of skill definitions that live in `test/datasets`. These are SnipsNLUEngine specifications.
 
-# Endpoints
+There is also `grok.sh`, which can be used like this:
 
-- `/`, `/skills`: list the skills
+~~~
+./test/grok.sh "beverage make me tea"
+~~~
 
-- `/grok`: POST a statement like  this via curl: `curl -d '{"q":"beverage make me coffee"}' -H "Content-Type: application/json" -X POST http://localhost:8337/grok` and you get the result of SnipsNLUEngine.parse
+# API Endpoints
+
+- `/`, `/skills`, `/skill`: list the skills
 - `/skill/<skill_name>`: get the original skill def
+- `/grok`: POST a statement like  this via curl: `curl -d '{"q":"beverage make me coffee"}' -H "Content-Type: application/json" -X POST http://localhost:8337/grok` and you get the result of SnipsNLUEngine.parse
 
 
 
