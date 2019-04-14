@@ -18,7 +18,7 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-COPY . .
+COPY bvapi bvapi
 
 RUN python3 -m snips_nlu download en
 
@@ -32,5 +32,6 @@ ENV FLASK_ENV development
 
 # CMD ["flask run "]
 
+RUN mkdir -p storage
 
 ENTRYPOINT [ "python3", "bvapi/app.py"]
