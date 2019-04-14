@@ -9,7 +9,7 @@ echo $SCRIPTPATH
 
 pushd $SCRIPTDIR
 
-DBFILE="../skill_store.db"
+DBFILE="../storage/skill_store.db"
 if [ -f $DBFILE ]; then
    echo "The file '$DBFILE' exists."
    read -p "Remove and reupload skills? " -n 1 -r
