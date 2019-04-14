@@ -2,12 +2,19 @@
 
 ## Docker:
 
-Do this in the `beeves-nlu-backend` directory:
+Do this in the `beeves-nlu-backend` directory (make sure all your containers and images are cleaned and pruned):
+~~~
+docker build -t altanorhon/beeves:beeves-nlu-backend .
+docker run --name bvn -v storage:/storage -p 8337:8337 altanorhon/beeves:beeves-nlu-backend -e "BEEVES_KEY=hunter2"
 ~~~
 
-docker build -t bv-nlu . 
-docker run --name bvn -v storage:/storage -p 8337:8337 bv-nlu        
-~~~
+Where `BEEVES_KEY` is specified either as a cookie that all clients should send (with the key being `BEEVES_KEY` and the value `hunter2`)  or as a `GET` parameter (e.g., `localhost:8337/?beeves_key=hunter2')
+
+## Just Docker
+
+# Instructions:
+# docker run --name bvn -v storage:/storage -p 8337:8337 altanorhon/beeves:beeves-nlu-backend
+
 
 
 ## Test
