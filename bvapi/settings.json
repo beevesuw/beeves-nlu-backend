@@ -1,0 +1,33 @@
+{
+  "DEBUG": true,
+  "DEFAULT_SETTINGS_PATH": "settings.json",
+  "LOG_DIR": "logs",
+  "SKILL_DB_PATH": "../storage/beeves_skills.db",
+  "JSON_SORT_KEYS": false,
+  "JSONIFY_PRETTYPRINT_REGULAR": true,
+  "JSON_AS_ASCII": false,
+  "LOG_LEVEL": "INFO",
+  "HOST_NAME": "0.0.0.0",
+  "HOST_PORT": "8337",
+  "LOGGING_DICT_CONFIG": {
+    "version": 1,
+    "formatters": {
+      "default": {
+        "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+      }
+    },
+    "handlers": {
+      "wsgi": {
+        "class": "logging.StreamHandler",
+        "stream": "ext://flask.logging.wsgi_errors_stream",
+        "formatter": "default"
+      }
+    },
+    "root": {
+      "level": "INFO",
+      "handlers": [
+        "wsgi"
+      ]
+    }
+  }
+}

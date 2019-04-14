@@ -1,3 +1,8 @@
+# Instructions:
+# docker build -t altanorhon/beeves:bv-nlu-backend .
+# docker run --name bvn -v storage:/storage -p 8337:8337 altanorhon/beeves:beeves-nlu-backend
+
+
 FROM python:3.7.3-stretch
 
 
@@ -30,4 +35,5 @@ ENV FLASK_ENV development
 
 # CMD ["flask run "]
 
-CMD [ "python3", "-m", "flask", "run", "--host=0.0.0.0", "--port=8337"]
+
+ENTRYPOINT [ "python3", "bvapi/app.py"]

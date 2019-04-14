@@ -2,6 +2,8 @@
 SCRIPTPATH=$(readlink -f $0)
 SCRIPTDIR=`dirname $SCRIPTPATH`
 
+URL=${BEEVES_SERVER_URL:-localhost:8337}
+
 echo $SCRIPTDIR
 echo $SCRIPTPATH
 
@@ -22,9 +24,11 @@ if [ -f $DBFILE ]; then
     fi
 fi
 
-curl -d @$(readlink -f './datasets/beverage_dataset.json')  -v --request PUT -H "Content-Type: application/json" --url http://localhost:8337/skill/beverage
-curl -d @$(readlink -f './datasets/flights_dataset.json')  -v --request PUT -H "Content-Type: application/json" --url http://localhost:8337/skill/flights
-curl -d @$(readlink -f './datasets/lights_dataset.json')  -v --request PUT -H "Content-Type: application/json" --url http://localhost:8337/skill/lights
-echo "Done populating"
+
+echo "Populating to $URL"
+curl -d @$(readlink -f './datasets/beverage_dataset.json')  -v --request PUT -H "Content-Type: application/json" --url $URL/skill/beverage  --cookie "BEEVES_KEY=$BEEVES_KEY"
+curl -d @$(readlink -f './datasets/flights_dataset.json')  -v --request PUT -H "Content-Type: application/json" --url  $URL/skill/flights --cookie "BEEVES_KEY=$BEEVES_KEY"
+curl -d @$(readlink -f './datasets/lights_dataset.json')  -v --request PUT -H "Content-Type: application/json" --url  $URL/skill/lights --cookie "BEEVES_KEY=$BEEVES_KEY"
+echo "Done populating to $URL"
 
 popd

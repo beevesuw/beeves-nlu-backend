@@ -1,14 +1,11 @@
+import logging
+import time
 from pathlib import Path
 
-import snips_nlu as sn
+import snips_nlu
 import snips_nlu.default_configs
+import snips_nlu.exceptions
 import sqlitedict
-from flask import current_app
-
-
-# TODO: document interfaces
-# TODO: examples
-# TODO: pytest
 
 
 class SkillStore(object):
@@ -34,12 +31,11 @@ class SkillStore(object):
 
         self.db_path = Path(db_path)
         if self.db_path.exists():
-            current_app.logger.info(f"'{db_path}' already exists; using that'")
+            logging.getLogger().info(f"'{db_path}' already exists; using that'")
 
         self.__db = sqlitedict.open(str(self.db_path), autocommit=True)
-
-        self.configs = {'snips_nlu': snips_nlu_config}
-        current_app.logger.info(f"Initialized {self.__class__.__name__} with path '{self.db_path}'")
+        self.default_snips_nlu_config = default_snips_nlu_config
+        logging.getLogger().info(f"Initialized {self.__class__.__name__} with path '{self.db_path}'")
 
     def keys(self):
         """List the names of the skills in the store
@@ -48,31 +44,35 @@ class SkillStore(object):
         """
         return self.__db.keys()
 
-    def __setitem__(self, skill_name: str, skill_definition: dict):
+    def __setitem__(self, skill_name: str, skill_definition):
         """Define a skill
         Args:
             skill_name: Skill name
             skill_definition: Skill definition -- this is strictly the format accepted by SnipsNLU Engine.
              TODO: Fix this to be independent.
         """
-        engine = sn.SnipsNLUEngine(config=self.configs['snips_nlu'])
-        engine.fit(skill_definition)
+        snips_nlu_config = skill_definition.setdefault('snips_nlu_config', self.default_snips_nlu_config)
 
         if skill_name in self.__db:
-            current_app.logger.info(f"Skill with name  '{skill_name}' already exists; overwriting...'")
+            logging.getLogger().info(f"Skill with name  '{skill_name}' already exists; overwriting...'")
+
+        logging.getLogger().info(f"Training skill with name  '{skill_name}'...'")
+        engine = snips_nlu.SnipsNLUEngine(config=snips_nlu_config)
+        start_time = time.time()
+        engine.fit(skill_definition)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
 
         engine_bytes = engine.to_byte_array()
 
-        if not engine_bytes:
-            current_app.logger.warning(
-                f"Skill with name  '{skill_name}' couldn't be serialized from the engine; aborting'")
-            return
+        logging.getLogger().info(f"Trained skill with name '{skill_name}' in {round(elapsed_time, 2)} s; size is {len(engine_bytes) // 1024} KiB. Going to serialize...")
 
-        obj = {'name': skill_name, 'src': skill_definition, 'engine': engine_bytes}
+        obj = {'name'            : skill_name, 'src': skill_definition, 'engine': engine_bytes,
+               'snips_nlu_config': snips_nlu_config}
 
         self.__db[skill_name] = obj
         self.__db.sync()
-        current_app.logger.info(f"Skill with name  '{skill_name}' written to the shelf'")
+        logging.getLogger().info(f"Skill with name  '{skill_name}' written to the shelf'")
 
     def __getitem__(self, skill_name: str):
         """Get the skill definition and resources from the store
@@ -82,14 +82,15 @@ class SkillStore(object):
         Returns:
            A dictionary with the skill definition and resources
         """
+        logging.getLogger().info('666666')
         if skill_name in self.__db:
             obj = self.__db[skill_name]
             if 'engine' in obj:
-                obj['engine'] = sn.SnipsNLUEngine.from_byte_array(obj['engine'])
+                obj['engine'] = snips_nlu.SnipsNLUEngine.from_byte_array(obj['engine'])
             else:
-                current_app.logger.warning(f"Skill '{skill_name}' didn't have a persisted engine")
+                logging.getLogger().warning(f"Skill '{skill_name}' didn't have a persisted engine")
         else:
-            current_app.logger.warning(f"Skill '{skill_name}' not found")
+            logging.getLogger().warning(f"Skill '{skill_name}' not found")
             raise KeyError(f"Skill '{skill_name}' not found")
         return obj
 
@@ -112,4 +113,3 @@ class SkillStore(object):
         """Get number of skills
          """
         return len(self.__db)
-

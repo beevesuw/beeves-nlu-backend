@@ -1,10 +1,21 @@
+from functools import wraps
 from os import getenv
+
+from flask import request
+
+import re
 
 
 class BeevesBackendException(Exception):
     status_code = 400
 
     def __init__(self, message, status_code=None, payload=None):
+        """
+        Args:
+            message:
+            status_code:
+            payload:
+        """
         Exception.__init__(self)
         self.message = message
         if status_code is not None:
@@ -22,6 +33,10 @@ class SkillNotFound(BeevesBackendException):
     message = "Skill not found"
 
     def __init__(self, skill_name: str):
+        """
+        Args:
+            skill_name (str):
+        """
         self.payload = {'skill_name': skill_name}
 
 
@@ -34,14 +49,11 @@ class AuthenticationError(BeevesBackendException):
         pass
 
 
-import re
-
-
 def canonicalize_skill_name(skill_name: str):
     """Function to clean up a skill name
 
     Args:
-        skill_name: Name of the skill.
+        skill_name (str): Name of the skill.
 
     Returns:
         The cleaned up name, or None.
@@ -53,11 +65,12 @@ def canonicalize_skill_name(skill_name: str):
     return lcw_skill_name
 
 
-from functools import wraps
-from flask import request
-
-
 def beeves_key_required(f):
+    """
+    Args:
+        f:
+    """
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         beeves_key = getenv('BEEVES_KEY')
