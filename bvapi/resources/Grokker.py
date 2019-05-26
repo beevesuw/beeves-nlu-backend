@@ -25,18 +25,29 @@ class Grokker(SkillStoreResource):
             The parse result and skill name that was found.
         """
         q = request.get_json()
-        skill_name = canonicalize_skill_name(q['q'].split(' ', 1)[0])
+        print(q)
+        skill_name = q.get('skill_name', '')
+        text = q.get('text', '')
+        top_n = q.get('top_n', None)
+        intents = q.get('intents', None)
+        ss_keys = [x for x in self.skill_store.keys()]
+        print(ss_keys)
+        if skill_name not in self.skill_store:
+            return {"skill_name": skill_name, "error" : "SkillNotFound"}
+        
+        
+       
 
         try:
-            skill = self.skill_store[skill_name]
+            skill = self.skill_store[ q['skill_name']]
         except KeyError:
-            raise SkillNotFound(skill_name)
+            return  {"skill_name": skill_name, "error" : "not found"}
 
         try:
-            parse_result = skill['engine'].parse(q["q"])
+            parse_result = skill['engine'].parse(text, intents, top_n)
         except KeyError:
-            raise BeevesBackendException("Skill %s did not have engine field" % skill_name)
+            return  {"skill_name": skill_name, "error" : "BeevesBackendException"}
         except SnipsNLUError:
-            raise BeevesBackendException("Skill %s failed to parse" % skill_name)
+            return  {"skill_name": skill_name, "error" : "SnipsNLUError"}
 
         return {"skill_name": skill_name, "parse_result": parse_result}
